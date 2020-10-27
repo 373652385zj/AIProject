@@ -34,6 +34,7 @@ import CheckpointEditor from "@/components/Configuration/CheckpointEditor";
 import ParkingDetector from  "@/components/Configuration/ParkingDetector";
 import CarDetector from "@/components/Configuration/CarDetector";
 import FaceDetector from "@/components/Configuration/FaceDetector";
+import NewParkingDetector from "@/components/ParkingDetector/ParkingDetector";
 
 Vue.use(Router);
 
@@ -194,6 +195,10 @@ export default new Router({
                         {
                             path: '/Configuration/FaceDetector',
                             component: FaceDetector
+                        },
+                        {
+                            path: '/NewParkingDetector',
+                            component: NewParkingDetector,
                         }
                     ]
                 }

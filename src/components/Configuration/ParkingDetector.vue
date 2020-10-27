@@ -1,7 +1,7 @@
 <template style="overflow-y: auto">
   <div>
     <b-tabs content-class="mt-3">
-      <b-tab title="人脸识别算法" active>
+      <b-tab title="人脸识别算法" active @click="handleTransform('1')">
         <div>
           <i-form
             ref="formFace"
@@ -39,7 +39,7 @@
                 <i-option
                   v-for="(item, i) in traceSelectList"
                   v-bind:key="i"
-                  :value.sync="item"
+                  :value="item"
                   >{{ item }}</i-option
                 >
               </i-select>
@@ -127,11 +127,10 @@
                 label-for="file-default"
                 label-cols-sm="2"
               > -->
-              
+
               <Form-item label="图片上传" prop="faceImage">
                 <b-form-file id="file-small" size="sm" @change="getImageFiles">
                 </b-form-file>
-                
               </Form-item>
               <!-- </b-form-group> -->
               <div>
@@ -146,7 +145,7 @@
               <!-- <span class="imageNames">{{ imageNames }}</span> -->
               <img class="imageFrame" :src="src" v-show="isShow" alt="" />
             </div>
-            <!-- 华丽的分割线 -->
+            <!-- ======华丽的分割线======= -->
             <!-- <div
             style="
               width: 100%;
@@ -166,28 +165,64 @@
             </ol>
           </div>
         </div>
-        <b-button
+        <!-- <b-button
           style="width: 100%"
           variant="primary"
           @click="handleSubmit('formFace')"
           >提交</b-button
-        >
+        > -->
       </b-tab>
-      <b-tab title="车辆识别算法"><p>车辆识别算法</p></b-tab>
-      <b-tab title="xxx识别算法"><p>xxx识别算法</p></b-tab>
+      <b-tab title="车辆识别算法" @click="handleTransform('2')">
+        <i-form
+          ref="formCar"
+          :model="formCar"
+          :rules="ruleValidateCar"
+          :label-width="150"
+        >
+          <Form-item label="启用" prop="startCar">
+            <i-switch
+              size="large"
+              v-model="formCar.startCar"
+              @on-change="startCarChange"
+            >
+              <span slot="open">启用</span>
+              <span slot="close">禁用</span>
+            </i-switch>
+          </Form-item>
+        </i-form>
+      </b-tab>
+      <b-tab title="xxx识别算法" @click="handleTransform('3')">
+        <i-form
+          ref="formxxx"
+          :model="formxxx"
+          :rules="ruleValidatexxx"
+          :label-width="150"
+        >
+          <Form-item label="启用" prop="startxxx">
+            <i-switch
+              size="large"
+              v-model="formxxx.startxxx"
+              @on-change="startxxxChange"
+            >
+              <span slot="open">启用</span>
+              <span slot="close">禁用</span>
+            </i-switch>
+          </Form-item>
+        </i-form>
+      </b-tab>
     </b-tabs>
   </div>
 </template>
 
 <script>
-import Status from "./Status";
-import CheckpointEditor from "./CheckpointEditor";
+// import Status from "./Status";
+// import CheckpointEditor from "./CheckpointEditor";
 
 export default {
   name: "parking-detector",
   components: {
-    Status,
-    CheckpointEditor,
+    // Status,
+    // CheckpointEditor,
   },
   data() {
     return {
@@ -201,6 +236,12 @@ export default {
         identifyValue: "",
         cover: "",
         faceFiles: {},
+      },
+      formCar: {
+        startCar: false,
+      },
+      formxxx: {
+        startxxx: false,
       },
       isDisabled: false,
       ruleValidate: {
@@ -254,17 +295,19 @@ export default {
           },
         ],
         faceImage: [
-            {
+          {
             required: true,
             message: "这是必填项",
             trigger: "change",
           },
-        ]
+        ],
       },
+      ruleValidateCar: {},
+      ruleValidatexxx: {},
       file: null,
       traceSelectList: ["开", "关"],
       alertList: ["开", "关"],
-      dimValueList: ['5', '10', '15', '20', '25', '30', '60'],
+      dimValueList: ["5", "10", "15", "20", "25", "30", "60"],
       photographModelList: ["普通抓拍", "人脸库抓拍", "非人脸库抓拍"],
       coverOrAddList: ["覆盖", "追加"],
       model1: "",
@@ -275,16 +318,36 @@ export default {
       btnIsShow: false,
     };
   },
+  created() {
+    var _this = this
+    setTimeout(function() {
+
+      // _this.ruleValidate.minPX[0].required = false;
+    },1000)
+  },
   methods: {
-    handleSubmit(name) {
-      console.log(this.$refs[name].model);
-      this.$refs[name].validate((valid) => {
-        if (valid && this.formFace.faceFiles.name) {
-          this.$Message.success("提交成功!");
-        } else {
-          this.$Message.error("表单验证失败!");
-        }
-      });
+    handleTransform(ids){
+      // if(ids == 1) {
+      //   console.log(this.formFace.start)
+      // }
+    },
+    handleSubmit(name, choose) {
+      var _this = this;
+      // console.log(_this)
+      // console.log(_this.$store.state.formFace)
+      if (choose == 1) {
+        this.$refs[name].validate((valid) => {
+          if (valid && this.formFace.faceFiles.name) {
+            this.$Message.success("提交成功!");
+            this.$store.state.isSubmitSuccess = true;
+          } else {
+            this.$Message.error("表单验证失败!");
+            this.$store.state.isSubmitSuccess = false;
+          }
+        });
+      } else if (choose == 2) {
+        console.log("验证车辆识别算法表单");
+      }
     },
     handleReset(name) {
       this.$refs[name].resetFields();
@@ -298,32 +361,46 @@ export default {
       this.formDynamic.items.$remove(item);
     },
     startChange(status) {
-      let _this = this;
-      //   this.$Message.info("开关状态：" + status);
+      this.isDisabled = !status;
+      this.openRule(status);
       if (status) {
-        this.isDisabled = false;
-        openRule(true);
-      } else {
-        this.isDisabled = true;
-        openRule(false);
+        this.formCar.startCar = !status;
+        this.formxxx.startxxx = !status;
       }
-      console.log(this);
-
-      function openRule(state) {
-        _this.ruleValidate.minPX[0].required = state;
-        _this.ruleValidate.trace[0].required = state;
-        _this.ruleValidate.alert[0].required = state;
-        _this.ruleValidate.dimValue[0].required = state;
-        _this.ruleValidate.dimModel[0].required = state;
-        _this.ruleValidate.identifyValue[0].required = state;
+    },
+    startCarChange(status) {
+      // console.log(status)
+      if (status) {
+        this.openRule(!status);
+        this.formFace.start = !status;
+        this.formxxx.startxxx = !status;
+        this.isDisabled = true; // 禁止编辑
       }
+    },
+    startxxxChange(status) {
+      // console.log(status)
+      if (status) {
+        this.openRule(!status);
+        this.formFace.start = !status;
+        this.formCar.startCar = !status;
+        this.isDisabled = true; // 禁止编辑
+      }
+    },
+    openRule(state) { // 用于控制一些编辑项是否允许编辑
+      console.log(this.ruleValidate)
+      this.ruleValidate.minPX[0].required = state;
+      this.ruleValidate.trace[0].required = state;
+      this.ruleValidate.alert[0].required = state;
+      this.ruleValidate.dimValue[0].required = state;
+      this.ruleValidate.dimModel[0].required = state;
+      this.ruleValidate.identifyValue[0].required = state;
     },
     getImageFiles(e) {
       e = e || window.event;
       if (e.target.files.length === 1) {
-        console.log("图片添加成功")
-        console.log(this.ruleValidate.faceImage.required)
-        this.ruleValidate.faceImage[0].required = false
+        console.log("图片添加成功");
+        console.log(this.ruleValidate.faceImage.required);
+        this.ruleValidate.faceImage[0].required = false;
         let files = e.target.files[0];
         console.log(files);
         this.formFace.faceFiles = files;
