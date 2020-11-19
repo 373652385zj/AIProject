@@ -12,9 +12,19 @@ const apiPath = {
             geditIPUrl: '/ip/geditIP',                                  //ip修改接口
             insertRTSPUrl: '/camera/add/rtsp',                          //添加rtsp流
             selectAllRTSPUrl: '/camera/selectAll/rtsp',                 //查询所有rtsp流
-            stopRTSPUrl: '/camera/stop/rtsp',                           //关闭指定rtsp流
+            // stopRTSPUrl: '/camera/stop/rtsp',                           //关闭指定rtsp流
             updateRTSPConfigUrl: '/camera/update/rtsp/config',          //更新设置
-
+            algorithmModeURL: 'camera/update/algorithmMode',
+            updateParkingPointUrl: "/car/updateParkingPoint",
+            getCarBoundingBoxUrl:"/car/getCarBoundingBox",
+            getCarBoxLiveUrl:"/car/getCarBoxLive",
+            getFaceBoxLiveUrl:"/face/getFaceBoxLive",
+            checkpointsUrl:"/camera/detect/checkpoints",
+            getFaceRecordUrl:"/face/getFaceRecord",
+            getParkingPointUrl:"/car/getParkingPoint",
+            insertFaceUrl:"/face/insertFace"
+            
+            
         }
     },
     methods:{

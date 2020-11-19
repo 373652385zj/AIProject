@@ -7,7 +7,12 @@ Vue.use(Vuex)
 export default new Vuex.Store({
     state: {
     //   formFace:[1,2]
-    isSubmitSuccess: true
+    isSubmitSuccess: true,
+    arithmetic: {
+      // 0: "car",
+      // 1: "face"
+    },
+    tabState: 1
       //这里放全局参数
     },
     mutations: {

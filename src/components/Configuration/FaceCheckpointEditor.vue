@@ -9,7 +9,7 @@
         </template>
         <!-- 基于mjpeg流的识别结果图像 -->
         <img
-                :src="host+'/camera/detect_box?url=rtsp://192.168.137.102:8557&mode=car'"
+                :src="host+getFaceBoxLiveUrl+'?url='+url"
                 id="detectSource"
                 crossorigin="Anonymous"
                 width="584px"
@@ -66,6 +66,7 @@
     import {v4 as uuid} from "uuid";
     import PubSub from "pubsub-js";
     import config from "@/config/config";
+    import http from "@/config/http"
 
     class ParkingSpace {
         constructor(x, y, id, name, ctx) {
@@ -232,7 +233,7 @@
                 tempStorage[ps.id] = {x: ps.x, y: ps.y, name: ps.name};
             });
             axios
-                .post(this.host + '/camera/detect/checkpoints', tempStorage)
+                .post(this.host + this.checkpointsUrl, tempStorage)
                 .then((resp) => {
                     if (resp.code !== 200) {
                         console.error("cannot post point data");
@@ -246,6 +247,7 @@
 
     export default {
         name: "ckeckpoint-editor",
+        mixins: [http],
         data: function () {
             return {
                 //识别结果画布及其上下文
@@ -273,7 +275,8 @@
                 },
                 //是否还在初始化
                 preparing: true,
-                host: config.axios.baseURL
+                host: config.axios.baseURL,
+                url: 'rtsp://192.168.137.102:8557'
             };
         },
         methods: {
@@ -307,7 +310,7 @@
                 this.host
             );
             //获取服务器端缓存的检查点信息
-            this.$curl.get('/camera/detect/checkpoints').then(res => {
+            this.$curl.get(this.checkpointsUrl).then(res => {
                     if (res.code === 200) {
                         this.parkingSpaceStorage.load(res.data);
                     } else{

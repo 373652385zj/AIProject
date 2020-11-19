@@ -191,18 +191,18 @@
           </Form-item>
         </i-form>
       </b-tab>
-      <b-tab title="xxx识别算法" @click="handleTransform('3')">
+      <b-tab title="电瓶车识别算法" @click="handleTransform('3')">
         <i-form
-          ref="formxxx"
-          :model="formxxx"
-          :rules="ruleValidatexxx"
+          ref="formEletromobile"
+          :model="formEletromobile"
+          :rules="ruleValidateElectromobile"
           :label-width="150"
         >
-          <Form-item label="启用" prop="startxxx">
+          <Form-item label="启用" prop="startEletromobile">
             <i-switch
               size="large"
-              v-model="formxxx.startxxx"
-              @on-change="startxxxChange"
+              v-model="formEletromobile.startEletromobile"
+              @on-change="startElectromobileChange"
             >
               <span slot="open">启用</span>
               <span slot="close">禁用</span>
@@ -217,13 +217,15 @@
 <script>
 // import Status from "./Status";
 // import CheckpointEditor from "./CheckpointEditor";
-
+import http from "@/config/http";
+    import config from "@/config/config";
 export default {
   name: "parking-detector",
   components: {
     // Status,
     // CheckpointEditor,
   },
+  mixins: [http],
   data() {
     return {
       formFace: {
@@ -240,8 +242,8 @@ export default {
       formCar: {
         startCar: false,
       },
-      formxxx: {
-        startxxx: false,
+      formEletromobile: {
+        startEletromobile: false,
       },
       isDisabled: false,
       ruleValidate: {
@@ -316,38 +318,86 @@ export default {
       isShow: false,
       imageFrameState: "预览",
       btnIsShow: false,
+      indexForm: 0,
+      host: config.axios.baseURL,
     };
   },
   created() {
-    var _this = this
-    setTimeout(function() {
+    var _this = this;
+    // setTimeout(function() {
 
-      // _this.ruleValidate.minPX[0].required = false;
-    },1000)
+    // _this.ruleValidate.minPX[0].required = false;
+    // },1000)
   },
   methods: {
-    handleTransform(ids){
-      // if(ids == 1) {
-      //   console.log(this.formFace.start)
-      // }
+    updateFormState() {
+      var arithmetic = this.$store.state.arithmetic[this.indexForm];
+
+      // if(arithmetic == 0) { // 三个值都不选
+      //   this.formFace.start = false
+      //   this.formCar.startCar = false
+      //   this.formEletromobile.startEletromobile = false
+      // }else
+      if (arithmetic == "face") {
+        // 人脸
+        this.formFace.start = true;
+        this.formCar.startCar = false;
+        this.formEletromobile.startEletromobile = false;
+      } else if (arithmetic == "car") {
+        // 汽车
+        this.formFace.start = false;
+        this.formCar.startCar = true;
+        this.formEletromobile.startEletromobile = false;
+      } else if (arithmetic == "batteryCar") {
+        // 电瓶车
+        this.formFace.start = false;
+        this.formCar.startCar = false;
+        this.formEletromobile.startEletromobile = true;
+      }
     },
-    handleSubmit(name, choose) {
+    setIndexForm(index) {
+      this.indexForm = index;
+    },
+    handleTransform(ids) {
+      this.$store.state.tabState = ids;
+    },
+    handleSubmit(choose) {
       var _this = this;
-      // console.log(_this)
-      // console.log(_this.$store.state.formFace)
-      if (choose == 1) {
-        this.$refs[name].validate((valid) => {
+      if (choose == "face") {
+        this.$refs["formFace"].validate((valid) => {
           if (valid && this.formFace.faceFiles.name) {
-            this.$Message.success("提交成功!");
+            this.$Message.success("算法选择：人脸识别算法");
+            this.updateData(this.indexForm, "face");
             this.$store.state.isSubmitSuccess = true;
           } else {
             this.$Message.error("表单验证失败!");
             this.$store.state.isSubmitSuccess = false;
           }
         });
-      } else if (choose == 2) {
-        console.log("验证车辆识别算法表单");
+      } else if (choose == "car") {
+        this.$Message.success("算法选择：车辆识别算法");
+        this.updateData(this.indexForm, "car");
+      } else if (choose == "batteryCar") {
+        this.$Message.success("算法选择：电瓶车识别算法");
+        this.updateData(this.indexForm, "batteryCar");
       }
+    },
+    updateData(id, mode) {
+      let url = `${this.host}/camera/update/algorithmMode`;
+      let data = {
+        id: id+1, 
+        mode
+      }
+      console.log(url,id, mode)
+      this.$curl.post(url, data)
+      .then((resp) => {
+        if (resp.status !== 200) {
+          console.error("cannot post point data");
+        }
+      })
+      .catch((err) => {
+        console.log(err);
+      });
     },
     handleReset(name) {
       this.$refs[name].resetFields();
@@ -361,33 +411,36 @@ export default {
       this.formDynamic.items.$remove(item);
     },
     startChange(status) {
+      this.$store.state.arithmetic[this.indexForm] = "face";
       this.isDisabled = !status;
-      this.openRule(status);
       if (status) {
         this.formCar.startCar = !status;
-        this.formxxx.startxxx = !status;
+        this.formEletromobile.startEletromobile = !status;
       }
     },
     startCarChange(status) {
-      // console.log(status)
+      this.$store.state.arithmetic[this.indexForm] = "car";
+
       if (status) {
-        this.openRule(!status);
+        // this.openRule(!status);
         this.formFace.start = !status;
-        this.formxxx.startxxx = !status;
+        this.formEletromobile.startEletromobile = !status;
         this.isDisabled = true; // 禁止编辑
       }
     },
-    startxxxChange(status) {
-      // console.log(status)
+    startElectromobileChange(status) {
+      this.$store.state.arithmetic[this.indexForm] = "batteryCar";
+
       if (status) {
-        this.openRule(!status);
+        // this.openRule(!status);
         this.formFace.start = !status;
         this.formCar.startCar = !status;
         this.isDisabled = true; // 禁止编辑
       }
     },
-    openRule(state) { // 用于控制一些编辑项是否允许编辑
-      console.log(this.ruleValidate)
+    openRule(state) {
+      // 用于控制一些编辑项是否允许编辑
+      console.log(this.ruleValidate);
       this.ruleValidate.minPX[0].required = state;
       this.ruleValidate.trace[0].required = state;
       this.ruleValidate.alert[0].required = state;
@@ -399,7 +452,7 @@ export default {
       e = e || window.event;
       if (e.target.files.length === 1) {
         console.log("图片添加成功");
-        console.log(this.ruleValidate.faceImage.required);
+        // console.log(this.ruleValidate.faceImage.required);
         this.ruleValidate.faceImage[0].required = false;
         let files = e.target.files[0];
         console.log(files);

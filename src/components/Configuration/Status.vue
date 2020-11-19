@@ -1,7 +1,7 @@
 <template>
     <b-card id="parkingListContainer" body-class="overflow-auto maxh">
         <template v-slot:header>
-            车位列表 | 现有车位{{ parkingSpaceStorage.storage.length }}个
+            人脸列表 | 现有车位{{ parkingSpaceStorage.storage.length }}个
             <b-progress :max="parkingSpaceStorage.storage.length" show-value class="mt-3">
                 <b-progress-bar :value="parkingSpaceStorage.available" variant="success"/>
                 <b-progress-bar :value="parkingSpaceStorage.storage.length - parkingSpaceStorage.available"

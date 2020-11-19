@@ -12,7 +12,6 @@
       <b-modal id="live" title="实时画面" size="lg" ok-only ok-title="返回">
         <b-img
           :src="
-            'http://' +
             host +
             '/car/getCarBoxLive?url=rtsp://192.168.137.102:8557'
           "
@@ -30,7 +29,7 @@
     /> -->
     <img
       :src="
-        'http://' + host + '/car/getCarBoxLive?url=rtsp://192.168.137.102:8557'
+        host + '/car/getCarBoxLive?url=rtsp://192.168.137.102:8557'
       "
       id="detectSource"
       style="display: none"
@@ -90,7 +89,8 @@ import axios from "axios";
 import { v4 as uuid } from "uuid";
 import PubSub from "pubsub-js";
 // import conf0Src1 from "@/assets/car.jpg";
-
+import config from "@/config/config";
+import http from "@/config/http"
 class ParkingSpace {
   constructor(x, y, id, name, ctx) {
     this.x = x;
@@ -291,7 +291,7 @@ class ParkingSpaceStorage {
     });
     axios
       // .post(`http://${this.host}/detect/checkpoints`, tempStorage)
-      .post(`http://${this.host}/car/updateParkingPoint`, {
+      .post(`${this.host+this.updateParkingPointUrl}`, {
         url: this.url,
         parkingPoint: tempStorage,
       })
@@ -308,12 +308,13 @@ class ParkingSpaceStorage {
 
 export default {
   name: "ckeckpoint-editor",
+  mixins: [http],
   props: {
     // host: String,
   },
   data: function () {
     return {
-      host: "mqtt.iot.nlinks.cn:9898",
+      host: config.axios.baseURL,
       url: "rtsp://192.168.137.102:8557",
       //识别结果画布及其上下文
       detectCanvas: null,
@@ -384,7 +385,7 @@ export default {
     //获取服务器端缓存的检查点信息
     await axios
       // .get(`http://${this.host}/camera/detect/checkpoints`)
-      .post(`http://${this.host}/car/getParkingPoint`, {
+      .post(`${this.host+this.getParkingPointUrl}`, {
         url: this.url,
       })
       .then((resp) => {
@@ -400,7 +401,7 @@ export default {
     //获取识别框
     await axios
       // .get(`http://${this.host}/camera/detect/box`)
-      .post(`http://${this.host}/car/getCarBoundingBox`, {
+      .post(`${this.host+this.getCarBoundingBoxUrl}`, {
         url: this.url,
       })
       .then((resp) => {
@@ -454,7 +455,7 @@ export default {
         lastFetchTimestamp = time;
         await axios
           // .get(`http://${this.host}/camera/detect/box`)
-          .post(`http://${this.host}/car/getCarBoundingBox`, {
+          .post(`${this.host+this.getCarBoundingBoxUrl}`, {
             url: this.url,
           })
           .then((resp) => {

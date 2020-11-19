@@ -5,7 +5,12 @@
         <h3>设备管理</h3>
         <div class="aline"></div>
         <div style="padding: 10px 10px 10px 10px; text-align: center">
-          <Table width="850" border :columns="deviceHeader" :data="deviceData">
+          <Table width="1000" border :columns="deviceHeader" :data="deviceData">
+            <template slot-scope="{ row }" slot="arithmeticMode">
+              <span v-if="isRouterAlive">
+                {{ row.arithmeticMode }}
+              </span>
+            </template>
             <template slot-scope="{ row, index }" slot="operation">
               <Button
                 type="primary"
@@ -101,21 +106,36 @@
 
 <script>
 import http from "@/config/http";
-import { axios } from "@/config/config";
+import axios from "axios";
 import ParkingDetector from "@/components/Configuration/ParkingDetector";
 
 export default {
   name: "global_config",
   components: { ParkingDetector },
+  provide() {
+    return {
+      reload: this.reload,
+    };
+  },
+  inject: ["reload"],
   methods: {
-    handleMessage(onoff) {
-      console.log(onoff);
+    reload() {
+      console.log("afa");
+      var _this = this;
+      this.isRouterAlive = false;
+      this.$nextTick(function () {
+        this.isRouterAlive = true;
+      });
     },
+    handleMessage(onoff) {},
     save(event) {
       console.log(event.target.value);
     },
     editDeviceConfig(index) {
       // this.showConfig = true;
+      // setIndexForm
+      this.$refs.mychild.setIndexForm(index);
+      this.$refs.mychild.updateFormState();
       this.indexForm = index;
       this.rtspUrl = "rtsp://";
       if (this.deviceData[index].auth === 1) {
@@ -156,15 +176,22 @@ export default {
       var _this = this;
       // this.$Message.info("点击了确定");
       // 取出store中的数据进行判断
-      this.$refs.mychild.handleSubmit("formFace",1);
+      console.log(this.indexForm,_this.$store.state.arithmetic[this.indexForm])
+      this.$refs.mychild.handleSubmit(
+        _this.$store.state.arithmetic[this.indexForm]
+      );
+
       setTimeout(() => {
-        if(this.$store.state.isSubmitSuccess) {
+        if (this.$store.state.isSubmitSuccess) {
           this.loading = false;
           this.$nextTick(() => {
             _this.loading = true;
-            this.showModal = false;
+            _this.showModal = false;
+
+            _this.getLiveData();
+            // _this.reload();
           });
-        }else {
+        } else {
           this.loading = false;
           this.$nextTick(() => {
             _this.loading = true;
@@ -203,7 +230,7 @@ export default {
       this.showConfig = false;
       let url = this.updateRTSPConfigUrl;
       let data = {};
-      alert(JSON.stringify(this.modalData));
+      // alert(JSON.stringify(this.modalData));
       // this.$curl.post(url, data).then(res => {
       //
       // }, err => {
@@ -220,12 +247,35 @@ export default {
         mode;
       this.detectUrl.carUrl = url;
     },
-    gotoSeeDetect(index){
-      this.$router.push({
-        path: "/NewParkingDetector",
-        name: "",
-      });
-    }
+    gotoSeeDetect(index) {
+      console.log(index)
+      console.log(this.indexForm)
+      console.log(this.$store.state.arithmetic)
+      if (this.$store.state.arithmetic[index] == "face") {
+        this.$router.push({
+          path: "/Configuration/FaceDetector",
+          name: "",
+        });
+      } else if (this.$store.state.arithmetic[index] == "car") {
+        this.$router.push({
+          path: "/Configuration/NewParkingDetector",
+          name: "",
+        });
+      } else if (this.$store.state.arithmetic[index] == "batteryCar") {
+        this.$router.push({
+          path: "/Configuration/BatteryCarDetector",
+          name: "",
+        });
+      } 
+      // else if (this.$store.state.arithmetic[this.indexForm] == 0) {
+      //   if (this.$store.state.tabState == 1) {
+      //     this.$router.push({
+      //       path: "/Configuration/FaceDetector",
+      //       name: "",
+      //     });
+      //   }
+      // }
+    },
     // gotoSeeDetect(index) {
     //   this.indexForm = index;
     //   this.rtspUrl = "rtsp://";
@@ -247,6 +297,40 @@ export default {
     //     },
     //   });
     // },
+    getLiveData() {
+      let url = this.selectAllRTSPUrl;
+      var _this = this;
+      console.log(this)
+      this.$curl.post(url).then(
+        (res) => {
+          if (res.code === 200) {
+            _this.deviceData = res.data;
+            console.log(_this.deviceData)
+            // 假数据
+            // _this.deviceData[0].mode = this.$store.state.arithmetic[0];
+            // _this.deviceData[1].mode = this.$store.state.arithmetic[1]; 
+
+            _this.deviceData.forEach((item, index) => {
+              item.enable = item.enable === 1 ? "启用" : "禁用";
+              // car,face,batteryCar
+            _this.$store.state.arithmetic[index] = item.mode
+              if (item.mode == "face") {
+                item.arithmeticMode = "人脸识别算法";
+              } else if (item.mode == "car") {
+                item.arithmeticMode = "车辆识别算法";
+              } else if (item.mode == "batteryCar") {
+                item.arithmeticMode = "电瓶车识别算法";
+              }
+            });
+          } else {
+            this.$Message.warning(res);
+          }
+        },
+        (err) => {
+          this.$Message.error(err);
+        }
+      );
+    },
   },
   data() {
     return {
@@ -304,6 +388,14 @@ export default {
           title: "设备状态",
           key: "enable",
           width: 100,
+          align: "center",
+        },
+        {
+          title: "算法模式",
+          key: "arithmeticMode",
+          width: 130,
+          slot: "arithmeticMode",
+          align: "center",
         },
         {
           title: "操作",
@@ -322,27 +414,20 @@ export default {
         carUrl: "",
         faceUrl: "",
       },
+      isRouterAlive: true,
     };
   },
   mixins: [http],
   created() {
-    let url = this.selectAllRTSPUrl;
-    this.$curl.post(url).then(
-      (res) => {
-        if (res.code === 200) {
-          this.deviceData = res.data;
-          this.deviceData.forEach((item) => {
-            item.enable = item.enable === 1 ? "启用" : "禁用";
-          });
-        } else {
-          this.$Message.warning(res.msg);
-        }
-      },
-      (err) => {
-        this.$Message.error(err);
-      }
-    );
+    // var _this = this;
+    this.getLiveData()
   },
+  // mounted() {
+  //   var _this = this;
+  //   console.log("updated");
+  //   _this.requestTableData();
+  //   console.log(this.deviceData);
+  // },
   destroyed() {
     this.cancel();
   },

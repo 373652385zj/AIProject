@@ -36,6 +36,11 @@ export default {
       host: "mqtt.iot.nlinks.cn:9898",
     };
   },
+  methods: {
+    gotoBack() {
+      window.history.back();
+    },
+  },
 };
 </script>
 

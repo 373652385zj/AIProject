@@ -1,9 +1,10 @@
 <template>
   <Layout>
     <Sider style="background-color: white; border-right: 1px solid #dcdee2">
+      <!-- @on-current-change="liveChange" -->
       <Table
         highlight-row
-        @on-current-change="liveChange"
+        
         :columns="tableHead"
         :data="deviceData"
         border

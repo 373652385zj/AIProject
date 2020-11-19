@@ -6,10 +6,10 @@
                         <Icon type="ios-filing"/>
                         全局配置
                     </MenuItem>
-                    <!-- <MenuItem name="2" to="/Configuration/camera_config">
+                    <MenuItem name="2" to="/Configuration/camera_config">
                         <Icon type="ios-filing"/>
                         相机配置
-                    </MenuItem> -->
+                    </MenuItem>
 
                 </Menu>
             </div>

@@ -9,9 +9,13 @@
           v-bind:key="i"
           @click="showFrames(i)"
         >
-          <img class="headPortraitImg" :src="goal.img" alt="headPortraitImg" />
+          <img
+            class="headPortraitImg"
+            :src="goal.file_path"
+            alt="headPortraitImg"
+          />
           <div class="details">
-            <p>人脸编号：{{ goal.id }}</p>
+            <p>人脸编号：{{ goal.userId }}</p>
             <p><span>姓</span>名：{{ goal.name }}</p>
             <p>识别时间：{{ goal.identifyDate }}</p>
           </div>
@@ -32,6 +36,8 @@
 <script>
 import PubSub from "pubsub-js";
 import headPortraitImg from "../../assets/img/reddot_logo.png";
+import config from "@/config/config";
+import http from "@/config/http"
 
 class ParkingSpaceStorage {
   //与darknet.vue里面的同名类区别：这个类主要储存位置信息和ID信息，darknet.vue里的主要控制显示
@@ -89,6 +95,7 @@ class ParkingSpaceStorage {
 
 export default {
   name: "status",
+  mixins: [http],
   data: function () {
     return {
       parkingSpaceStorage: null,
@@ -99,12 +106,14 @@ export default {
       },
       identifyGoalList: [
         {
-          img: headPortraitImg,
-          id: "00000000007",
+          file_path: headPortraitImg,
+          userId: "00000000007",
           name: "XXX",
           identifyDate: "XX.XX.XX XX:XX:XX",
         },
       ],
+      host: config.axios.baseURL,
+      wsurl: config.axios.wsurl,
     };
   },
   methods: {
@@ -130,6 +139,58 @@ export default {
     showFrames: function (id) {
       console.log(id);
     },
+    format: function (date, fmt) {
+      if (/(y+)/.test(fmt)) {
+        fmt = fmt.replace(
+          RegExp.$1,
+          (date.getFullYear() + "").substr(4 - RegExp.$1.length)
+        );
+      }
+      let o = {
+        "M+": date.getMonth() + 1,
+        "d+": date.getDate(),
+        "h+": date.getHours(),
+        "m+": date.getMinutes(),
+        "s+": date.getSeconds(),
+      };
+      for (let k in o) {
+        if (new RegExp(`(${k})`).test(fmt)) {
+          let str = o[k] + "";
+          fmt = fmt.replace(
+            RegExp.$1,
+            RegExp.$1.length === 1 ? str : padLeftZero(str)
+          );
+        }
+      }
+      function padLeftZero(str) {
+        return ("00" + str).substr(str.length);
+      }
+      return fmt;
+    },
+    refresh: function () {
+      var socket;
+      var host = this.host;
+      console.log(host);
+
+      try {
+        socket = new WebSocket(this.wsurl);
+        socket.onopen = function (msg) {
+          console.log("socket session create sucess!");
+        };
+        socket.onmessage = function (msg) {
+          console.log("message Sucess");
+        };
+        socket.onclose = function (msg) {
+          console.log("close Sucess");
+        };
+        socket.onerror = function (msg) {
+          console.log("Error!");
+        };
+        console.log(socket);
+      } catch (ex) {
+        console.log(ex);
+      }
+    },
   },
   created: function () {
     this.parkingSpaceStorage = new ParkingSpaceStorage();
@@ -145,19 +206,32 @@ export default {
     PubSub.subscribe("rename", (msg, payload) => {
       this.parkingSpaceStorage.rename(payload.id, payload.name);
     });
+    var _this = this;
+
     axios
-      .post("/user", {
-        firstName: "Fred",
-        lastName: "Flintstone",
-      })
-      .then(function (response) {
-        console.log(response);
-        // this.identifyGoalList = response
+      .post(this.getFaceRecordUrl)
+      .then(function (res) {
+        if (res.code === 200) {
+          _this.identifyGoalList = [];
+          let index = 0;
+          for (let c in res.data) {
+            _this.identifyGoalList.push(res.data[c]);
+            _this.identifyGoalList[index].identifyDate = _this.format(
+              new Date(res.data[c].timestamp*1000),"yyyy-MM-dd hh:mm:ss"
+            );
+            index++;
+          }
+        }
       })
       .catch(function (error) {
         console.log(error);
       });
+
+    // console.log(new WebSocket(this.host))
+    console.log("websocket");
+    this.refresh();
   },
+
   computed: {
     availableOnly: function () {
       let data = [];
