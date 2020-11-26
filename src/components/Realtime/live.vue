@@ -23,6 +23,7 @@
           height: 100%;
           width: 100%;
           text-align: center;
+          padding: 30px;
           border-radius: 5px;
         "
       >
@@ -50,7 +51,7 @@
         />
       </div>
     </Layout>
-    <Sider style="background-color: #ffffff; border-left: 1px solid #dcdee2"
+    <Sider style="display: none;background-color: #ffffff; border-left: 1px solid #dcdee2"
       >侧边栏</Sider
     >
   </Layout>
@@ -77,8 +78,7 @@ export default {
       deviceData: [],
       liveUrl: "",
       rtspUrl: "",
-      LPWidth: "720px",
-      LPHeight: "480px",
+      LPWidth: "100%",
     };
   },
   methods: {
@@ -173,15 +173,15 @@ export default {
   },
   mounted() {
     // 监视窗口变化
-    // var _this = this;
+    var _this = this;
     window.onresize = () => {
-      // if()
-      //   return (() => {
-      //     if (document.getElementById("livePicture").width >= "480px") {
-      //       console.log("move the windows");
-      //       // _this.LPHeight = (_this.LPWidth * 480) / 720 + "px";
-      //     }
-      //   })();
+      return (() => {
+        var w = document.getElementById("livePicture").width;
+        var h = document.getElementById("livePicture").height;
+        console.log(w,h)
+        var d = w / 720;
+        _this.LPHeight = 480 * d;
+      })();
     };
   },
   destroyed() {
@@ -222,16 +222,7 @@ export default {
   background-color: #67c23a;
 }
 .livePicture {
-  margin-top: 20px;
+  // margin-top: 20px;
   border: 1px solid rgba(0, 0, 0, 0.5);
-}
-
-@width: 1000px;
-@pro: 480/720;
-@media screen and (min-width: 1500px) {
-  .livePicture {
-    width: @width;
-    height: @width * @pro;
-  }
 }
 </style>

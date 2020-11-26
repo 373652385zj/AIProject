@@ -22,7 +22,7 @@ const apiPath = {
             checkpointsUrl:"/camera/detect/checkpoints",
             getFaceRecordUrl:"/face/getFaceRecord",
             getParkingPointUrl:"/car/getParkingPoint",
-            insertFaceUrl:"/face/insertFace"
+            insertFaceUrl:"/face/insertFace",
             
             
         }

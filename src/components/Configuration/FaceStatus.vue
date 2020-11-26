@@ -105,12 +105,12 @@ export default {
         name: "",
       },
       identifyGoalList: [
-        {
-          file_path: headPortraitImg,
-          userId: "00000000007",
-          name: "XXX",
-          identifyDate: "XX.XX.XX XX:XX:XX",
-        },
+        // {
+        //   file_path: headPortraitImg,
+        //   userId: "00000000007",
+        //   name: "XXX",
+        //   identifyDate: "XX.XX.XX XX:XX:XX",
+        // },
       ],
       host: config.axios.baseURL,
       wsurl: config.axios.wsurl,
@@ -170,6 +170,7 @@ export default {
     refresh: function () {
       var socket;
       var host = this.host;
+      var _this = this
       console.log(host);
 
       try {
@@ -178,6 +179,12 @@ export default {
           console.log("socket session create sucess!");
         };
         socket.onmessage = function (msg) {
+          console.log(msg)
+          var data = JSON.parse(msg.data.replaceAll('\'','"')).face
+          console.log(data)
+          _this.identifyGoalList.unshift(data)
+          _this.identifyGoalList.splice(_this.identifyGoalList.length-1,1)
+
           console.log("message Sucess");
         };
         socket.onclose = function (msg) {

@@ -31,7 +31,7 @@
     /> -->
     <img
       :src="
-        host + getCarBoxLiveUrl + '?url=rtsp://192.168.137.102:8557'
+        host + getCarBoxLiveUrl + '?url=' + url
       "
       id="detectSource"
       style="display: none"
@@ -153,18 +153,14 @@ class ParkingSpace {
     // console.log("available:",available,this.available)
     // console.log(this.availableCounter)
     if (available) {
-      console.log(1)
       this.availableCounter++;
       if (this.availableCounter == 3) {
-      console.log(2)
         this.available = true;
         this.availableCounter = 0;
         stateChanged = true;
       }
     } else {
-      console.log(3)
       if (this.available) stateChanged = true;
-      console.log(4)
       this.available = false;
       this.availableCounter = 0;
     }
@@ -316,12 +312,12 @@ export default {
     // host: String,
   },
   created: function() {
-    console.log(this.updateParkingPointUrl)
+    // console.log(this.updateParkingPointUrl)
   },
   data: function () {
     return {
       host: config.axios.baseURL,
-      url: "rtsp://192.168.137.102:8557",
+      url: config.axios.rtspURL,
       //识别结果画布及其上下文
       detectCanvas: null,
       detectCtx: null,
@@ -350,6 +346,7 @@ export default {
       // conf0Src: conf0Src1,
       proportionX: 720/1980,
       proportionY: 480/1080,
+      DWidth: "100%",
     };
   },
   methods: {
@@ -376,6 +373,16 @@ export default {
   },
   mounted: async function () {
     const _this = this;
+
+    // 设置窗口变化改变视频大小
+    window.onresize = () => {
+      return (() => {
+        var w = document.getElementById("detectSource").width;
+        var h = document.getElementById("detectSource").height;
+        var d = w / 720;
+        document.getElementById("detectSource").height = 480 * d;
+      })();
+    };
     //创建对识别结果画布及其上下文的引用
     this.detectCanvas = document.getElementById("detectCanvas");
     this.detectCanvas.width = 720;

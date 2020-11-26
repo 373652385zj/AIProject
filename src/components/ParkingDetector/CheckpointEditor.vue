@@ -10,13 +10,7 @@
         >实时画面</b-button
       >
       <b-modal id="live" title="实时画面" size="lg" ok-only ok-title="返回">
-        <b-img
-          :src="
-            host +
-            '/car/getCarBoxLive?url=rtsp://192.168.137.102:8557'
-          "
-          fluid-grow
-        />
+        <b-img :src="host + getCarBoxLiveUrl + 'url=' + url" fluid-grow />
       </b-modal>
       <b-button @click="show()"></b-button>
     </template>
@@ -28,9 +22,7 @@
       crossorigin="Anonymous"
     /> -->
     <img
-      :src="
-        host + '/car/getCarBoxLive?url=rtsp://192.168.137.102:8557'
-      "
+      :src="host + getCarBoxLiveUrl + 'url=' + url"
       id="detectSource"
       style="display: none"
       crossorigin="Anonymous"
@@ -90,7 +82,7 @@ import { v4 as uuid } from "uuid";
 import PubSub from "pubsub-js";
 // import conf0Src1 from "@/assets/car.jpg";
 import config from "@/config/config";
-import http from "@/config/http"
+import http from "@/config/http";
 class ParkingSpace {
   constructor(x, y, id, name, ctx) {
     this.x = x;
@@ -102,8 +94,8 @@ class ParkingSpace {
     this.available = true;
     this.highlight = false;
     this.availableCounter = 0;
-    this.proportionX = 720/1980;
-    this.proportionY = 480/1080;
+    this.proportionX = 720 / 1980;
+    this.proportionY = 480 / 1080;
   }
 
   isHover(mouseX, mouseY) {
@@ -127,8 +119,8 @@ class ParkingSpace {
   refreshAvailability(detections) {
     let available = true;
     let stateChanged = false;
-    let index = 0
-    console.log(detections)
+    let index = 0;
+    console.log(detections);
     // for (let e in detections) {
     //   if(!detections[e].available) {
     //     available = detections[e].available
@@ -150,18 +142,14 @@ class ParkingSpace {
     // console.log("available:",available,this.available)
     // console.log(this.availableCounter)
     if (available) {
-      console.log(1)
       this.availableCounter++;
       if (this.availableCounter == 3) {
-      console.log(2)
         this.available = true;
         this.availableCounter = 0;
         stateChanged = true;
       }
     } else {
-      console.log(3)
       if (this.available) stateChanged = true;
-      console.log(4)
       this.available = false;
       this.availableCounter = 0;
     }
@@ -193,7 +181,6 @@ class ParkingSpace {
       this.ctx.stroke();
     }
   }
-
 }
 
 class ParkingSpaceStorage {
@@ -249,9 +236,9 @@ class ParkingSpaceStorage {
 
   refreshAvailability(detections) {
     this.forEach((ps) => {
-      console.log(ps)
+      console.log(ps);
       let stateChanged = ps.refreshAvailability(detections);
-      console.log(stateChanged)
+      console.log(stateChanged);
       if (stateChanged) {
         PubSub.publish("change", { id: ps.id, available: ps.available });
       }
@@ -291,7 +278,7 @@ class ParkingSpaceStorage {
     });
     axios
       // .post(`http://${this.host}/detect/checkpoints`, tempStorage)
-      .post(`${this.host+this.updateParkingPointUrl}`, {
+      .post(`${this.host + this.updateParkingPointUrl}`, {
         url: this.url,
         parkingPoint: tempStorage,
       })
@@ -314,8 +301,9 @@ export default {
   },
   data: function () {
     return {
+      //'/car/getCarBoxLive?url=rtsp://192.168.137.102:8557'
       host: config.axios.baseURL,
-      url: "rtsp://192.168.137.102:8557",
+      url: config.axios.rtspURL,
       //识别结果画布及其上下文
       detectCanvas: null,
       detectCtx: null,
@@ -342,8 +330,8 @@ export default {
       //是否还在初始化,“加载中”
       preparing: true,
       // conf0Src: conf0Src1,
-      proportionX: 720/1980,
-      proportionY: 480/1080,
+      proportionX: 720 / 1980,
+      proportionY: 480 / 1080,
     };
   },
   methods: {
@@ -370,6 +358,16 @@ export default {
   },
   mounted: async function () {
     const _this = this;
+
+    // 设置窗口变化改变视频大小
+    window.onresize = () => {
+      return (() => {
+        var w = document.getElementById("detectSource").width;
+        var h = document.getElementById("detectSource").height;
+        var d = w / 720;
+        document.getElementById("detectSource").height = 480 * d;
+      })();
+    };
     //创建对识别结果画布及其上下文的引用
     this.detectCanvas = document.getElementById("detectCanvas");
     this.detectCanvas.width = 720;
@@ -385,7 +383,7 @@ export default {
     //获取服务器端缓存的检查点信息
     await axios
       // .get(`http://${this.host}/camera/detect/checkpoints`)
-      .post(`${this.host+this.getParkingPointUrl}`, {
+      .post(`${this.host + this.getParkingPointUrl}`, {
         url: this.url,
       })
       .then((resp) => {
@@ -401,7 +399,7 @@ export default {
     //获取识别框
     await axios
       // .get(`http://${this.host}/camera/detect/box`)
-      .post(`${this.host+this.getCarBoundingBoxUrl}`, {
+      .post(`${this.host + this.getCarBoundingBoxUrl}`, {
         url: this.url,
       })
       .then((resp) => {
@@ -455,7 +453,7 @@ export default {
         lastFetchTimestamp = time;
         await axios
           // .get(`http://${this.host}/camera/detect/box`)
-          .post(`${this.host+this.getCarBoundingBoxUrl}`, {
+          .post(`${this.host + this.getCarBoundingBoxUrl}`, {
             url: this.url,
           })
           .then((resp) => {

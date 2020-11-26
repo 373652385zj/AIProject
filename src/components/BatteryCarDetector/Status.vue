@@ -8,6 +8,12 @@
                                 variant="danger"/> -->
             </b-progress>
     </template>
+    <b-modal id="live" title="实时画面" size="lg" ok-only ok-title="返回">
+        <b-img
+          :src="showImg"
+          fluid-grow
+        />
+      </b-modal>
     <b-table-simple small hover class="resultTable">
       <b-tbody class="batteryCarAlert">
         <b-tr
@@ -15,10 +21,11 @@
           v-for="(goal, i) in batteryCarResult"
           v-bind:key="i"
           variant="danger"
+          @click="changeShowImg(goal.img)"
+          v-b-modal.live
         >
           <b-td >{{goal.date}}</b-td>
           <b-td >{{goal.info}}</b-td>
-          
 
         </b-tr>
         <!-- <b-tr
@@ -121,15 +128,18 @@ export default {
         id: "",
         name: "",
       },
-      // showImg: batteryCarImg1,
+      showImg: batteryCarImg1,
       batteryCarResult: [
         {
+          img: batteryCarImg1,
           date: "2020-11-09 15:13:12",
           info: "电瓶车闯入"
         },{
+          img: batteryCarImg2,
           date: "2020-11-09 15:13:12",
           info: "电瓶车闯入"
         },{
+          img: batteryCarImg3,
           date: "2020-11-09 15:13:12",
           info: "电瓶车闯入"
         }
@@ -137,6 +147,9 @@ export default {
     };
   },
   methods: {
+    changeShowImg: function(src) {
+      this.showImg = src
+    },
     showRenameBox: function (id, name) {
       this.editing.id = id;
       this.editing.name = name;
