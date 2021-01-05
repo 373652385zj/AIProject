@@ -17,8 +17,8 @@ module.exports = {
   // 后端请求配置
   axios: {//http://112.74.47.182:9898  iot.reddot.mobi:9898
     // 配置后端的地址，如果启用nginx时需要配置nginx的地址
-    // baseURL: "http://192.168.137.100:5000", //后端请求接口ip:port
-    baseURL: "http://iot.reddot.mobi:9898", //后端请求接口ip:port
+    baseURL: "http://192.168.137.100:5000", //后端请求接口ip:port
+    // baseURL: "http://iot.reddot.mobi:9898", //后端请求接口ip:port
     // baseURL: "http://112.74.47.182:9898", //后端请求接口ip:port
     // wsurl: "ws://192.168.137.100:4567",
     // wsurl: "ws://192.168.137.100:4001",

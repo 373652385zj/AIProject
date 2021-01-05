@@ -34,8 +34,10 @@
         host + getCarBoxLiveUrl + '?url=' + url
       "
       id="detectSource"
-      style="display: none"
+      style="display: none;background: red"
       crossorigin="Anonymous"
+      width="584px"
+      height="414px"
     />
     <!-- UI设计时占位用的猫猫图 -->
     <!-- <img src="../assets/720x480.png" id="detectSource" style="display: none;" /> -->
@@ -205,8 +207,8 @@ class ParkingSpaceStorage {
 
   load(data) {
     // alert(this.host);
-    console.log("====");
-    console.log(data);
+    // console.log("====");
+    // console.log(data);
     for (let id in data) {
       this.create(data[id].x, data[id].y, false, id, data[id].name);
     }

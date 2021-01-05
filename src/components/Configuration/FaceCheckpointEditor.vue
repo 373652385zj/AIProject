@@ -318,13 +318,13 @@ export default {
       this.host
     );
     //获取服务器端缓存的检查点信息
-    this.$curl.get(this.checkpointsUrl).then((res) => {
-      if (res.code === 200) {
-        this.parkingSpaceStorage.load(res.data);
-      } else {
-        this.$Message.warning(JSON.stringify(res));
-      }
-    });
+    // this.$curl.get(this.checkpointsUrl).then((res) => {
+    //   if (res.code === 200) {
+    //     this.parkingSpaceStorage.load(res.data);
+    //   } else {
+    //     this.$Message.warning(JSON.stringify(res));
+    //   }
+    // });
     // //获取识别框
     //  axios
     //     .get(`${this.host}/camera/detect/box`)

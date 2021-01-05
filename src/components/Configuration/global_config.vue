@@ -107,6 +107,7 @@
 <script>
 import http from "@/config/http";
 import axios from "axios";
+import config from "@/config/config";
 import ParkingDetector from "@/components/Configuration/ParkingDetector";
 
 export default {
@@ -248,9 +249,11 @@ export default {
       this.detectUrl.carUrl = url;
     },
     gotoSeeDetect(index) {
-      console.log(index)
-      console.log(this.indexForm)
-      console.log(this.$store.state.arithmetic)
+      // console.log(index)
+      // console.log(this.indexForm)
+      // console.log(this.$store.state.arithmetic)
+      config.axios.rtspURL = "rtsp://"+this.deviceData[index].url
+      console.log(config.axios.rtspURL)
       if (this.$store.state.arithmetic[index] == "face") {
         this.$router.push({
           path: "/Configuration/FaceDetector",

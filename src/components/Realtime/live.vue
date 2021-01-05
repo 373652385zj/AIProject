@@ -2,13 +2,7 @@
   <Layout>
     <Sider style="background-color: white; border-right: 1px solid #dcdee2">
       <!-- @on-current-change="liveChange" -->
-      <Table
-        highlight-row
-        
-        :columns="tableHead"
-        :data="deviceData"
-        border
-      >
+      <Table highlight-row :columns="tableHead" :data="deviceData" border>
         <template slot-scope="{ row }" slot="name">
           <strong>{{ row.name }}</strong>
         </template>
@@ -18,15 +12,7 @@
       <Header class="liveTitle" style="background-color: white"
         ><font style="font-size: large">实时画面</font></Header
       >
-      <div
-        style="
-          height: 100%;
-          width: 100%;
-          text-align: center;
-          padding: 30px;
-          border-radius: 5px;
-        "
-      >
+      <div id="viewBox">
         <!--                <OBJECT classid="clsid:9BE31822-FDAD-461B-AD51-BE1D1C159921" id="vlc" codebase="" width="600"-->
         <!--                        height="480" events="True">-->
         <!--                    <param name="MRL" value=""/>-->
@@ -44,14 +30,18 @@
         <img
           id="livePicture"
           class="livePicture"
-          style="border-radius: 5px"
           :width="LPWidth"
           :height="LPHeight"
           :src="liveUrl"
         />
       </div>
     </Layout>
-    <Sider style="display: none;background-color: #ffffff; border-left: 1px solid #dcdee2"
+    <Sider
+      style="
+        display: none;
+        background-color: #ffffff;
+        border-left: 1px solid #dcdee2;
+      "
       >侧边栏</Sider
     >
   </Layout>
@@ -78,7 +68,8 @@ export default {
       deviceData: [],
       liveUrl: "",
       rtspUrl: "",
-      LPWidth: "100%",
+      LPWidth: "90%",
+      LPHeight: false,
     };
   },
   methods: {
@@ -178,9 +169,22 @@ export default {
       return (() => {
         var w = document.getElementById("livePicture").width;
         var h = document.getElementById("livePicture").height;
-        console.log(w,h)
-        var d = w / 720;
-        _this.LPHeight = 480 * d;
+        var vh = document.getElementById("viewBox").offsetHeight;
+        var vw = document.getElementById("viewBox").offsetWidth;
+        // console.log("h>v -> w:" + w, "h:" + h, "vw:" + vw, "vh:" + vh);
+
+        // _this.LPWidth = vw
+
+        var d = 480 / 720;
+        console.log("400 / d:", 600 / d);
+        if (w < vw - 70) {
+          _this.LPHeight = vh - 150;
+          _this.LPWidth = _this.LPHeight / d;
+        } else if (h < vh - 70) {
+          _this.LPWidth = vw - 60;
+          _this.LPHeight = _this.LPWidth * d;
+        }
+
       })();
     };
   },
@@ -224,5 +228,19 @@ export default {
 .livePicture {
   // margin-top: 20px;
   border: 1px solid rgba(0, 0, 0, 0.5);
+}
+#viewBox {
+  height: 100vh;
+  padding: 30px;
+  padding-bottom: 100px;
+  border-radius: 10px;
+  // background: red;
+  position: relative;
+}
+#viewBox img {
+  border-radius: 5px;
+  position: absolute;
+  left: 50%;
+  transform: translate(-50%,0);
 }
 </style>
